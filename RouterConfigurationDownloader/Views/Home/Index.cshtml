@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Manage routers";
 }
 @using RouterConfigurationDownloader.Models
 @model RouterConfigurationDownloader.Models.Config
@@ -33,12 +33,19 @@
                             @Html.ActionLink("Download " + format, "GetConfig", "Home", new { name = router.Name, format = format }, new { @class = "btn btn-primary", @style = "color:white" })
                     }
                 </div>
-                <h3>Выберите файл для загрузки на роутер</h3>
+                <h3>Select file for uploading to router</h3>
                 @using (Html.BeginForm("Upload", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
                 {
                     <input type="hidden" value="@router.Name" id="name" name="name" />
-                    <input type="file" name="upload" /><br>
-                    <input type="submit" value="Загрузить" />
+                    <div class="input-group">
+                        <label class="input-group-btn">
+                            <span class="btn btn-primary">
+                                Browse&hellip; <input type="file" name="file" style="display: none;" multiple>
+                            </span>
+                        </label>
+                        <input type="text" class="form-control" readonly>
+                    </div>
+                    <input type="submit" name="Submit" id="Submit" value="Upload" class="btn btn-primary" />
                 }
             </div>
         </div>

@@ -88,11 +88,11 @@ namespace RouterConfigurationDownloader.Controllers
         }
 
         [HttpPost]
-        public ActionResult Upload(string name,HttpPostedFileBase upload)
+        public ActionResult Upload(string name, HttpPostedFileBase file)
         {
-            if (upload != null)
+            if (file != null)
             {
-                string cfg = (new System.IO.StreamReader(upload.InputStream)).ReadToEnd();
+                string cfg = (new System.IO.StreamReader(file.InputStream)).ReadToEnd();
                 var config = Config.Load();
                 var router = config.Routers.Where(r => r.Name == name).FirstOrDefault();
                 if (router != null)
