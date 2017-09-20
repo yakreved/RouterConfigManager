@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+@using RouterConfigurationDownloader.Models
+@model RouterConfigurationDownloader.Models.Config
+
+<br/>
+<div class="row">
+    <div class="col-md-6">
+        @Html.ActionLink("Add new Router","Create","Home", new { @class = "btn btn-primary", @style = "color:white" })
+    </div>
+</div>
+<br />
+<div class="row">
+    @foreach (RouterSsh router in Model.Routers)
+    {
+        <div class="col-md-6">
+            <div class="jumbotron">
+                <h2>@router.Name</h2>
+                <div class="btn-group">
+                    @Html.ActionLink("Edit", "Edit", new { name = router.Name }, new { @class = "btn btn-primary", @style = "color:white" })
+                    @Html.ActionLink("Delete", "Delete", new { name = router.Name }, new { @class = "btn btn-primary", @style = "color:white" })
+                </div>
+                <ul>
+                    <li>Address: @router.Address</li>
+                    <li>Port: @router.Port</li>
+                    <li>User name: @router.UserName</li>
+                    <li>User password: @router.UserPassword</li>
+                </ul>
+                <div class="btn-group">
+                    @foreach (var format in router.GetFormats())
+                    {
+                            @Html.ActionLink("Download " + format, "GetConfig", "Home", new { name = router.Name, format = format }, new { @class = "btn btn-primary", @style = "color:white" })
+                    }
+                </div>
+                <h3>Выберите файл для загрузки на роутер</h3>
+                @using (Html.BeginForm("Upload", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    <input type="hidden" value="@router.Name" id="name" name="name" />
+                    <input type="file" name="upload" /><br>
+                    <input type="submit" value="Загрузить" />
+                }
+            </div>
+        </div>
+    }
+</div>

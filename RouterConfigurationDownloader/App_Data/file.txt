@@ -1,0 +1,1 @@
+{"Routers":[{"Name":"VSRX","Address":"10.201.223.72","Port":2222,"UserName":"lab","UserPassword":"lab123","RType":0},{"Name":"My local router in vmware","Address":"192.168.128.154","Port":22,"UserName":"lab","UserPassword":"lab123","RType":0}]}
