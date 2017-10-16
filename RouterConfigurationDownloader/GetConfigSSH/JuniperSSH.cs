@@ -49,6 +49,7 @@ namespace RouterConfigurationDownloader.GetConfigSSH
         {
             using (var client = new SshClient(address, port, user, password))
             {
+                client.ConnectionInfo.Timeout = TimeSpan.FromSeconds(5);
                 client.Connect();
                 var stream = client.CreateShellStream("customCommand", 200, 24, 5000, 600, 4096);
                 stream.WriteLine("configure");

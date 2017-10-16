@@ -17,9 +17,8 @@ namespace RouterConfigurationDownloader.Models
         {
             try
             {
-                var fileContents = System.IO.File.ReadAllText(HostingEnvironment.MapPath(@"~/App_Data/file.txt"));
-                if (fileContents != null)
-                    return new JavaScriptSerializer().Deserialize<Config>(fileContents);
+                var fileContents = System.IO.File.ReadAllText(HostingEnvironment.MapPath(@"~/routers.txt"));
+                return new JavaScriptSerializer().Deserialize<Config>(fileContents);
             }
             catch { }
             return new Config();
@@ -27,7 +26,7 @@ namespace RouterConfigurationDownloader.Models
         public void Save()
         {
             var serialized = new JavaScriptSerializer().Serialize(this);
-            System.IO.File.WriteAllText(HostingEnvironment.MapPath(@"~/App_Data/file.txt"), serialized);
+            System.IO.File.WriteAllText(HostingEnvironment.MapPath(@"~/routers.txt"), serialized);
         }
     }
 

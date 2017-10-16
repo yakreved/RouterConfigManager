@@ -36,7 +36,9 @@
         {
             <br />
             <div class="alert alert-warning" role="alert">
-                @Html.Raw((Session["Alert"] as string).Replace("\r\n", "<br />"))
+                <pre style="background-color:transparent;line-height:1">
+                    @Html.Raw((Session["Alert"] as string))
+                </pre>
                 @{ Session["Alert"] = null;}
             </div>
                     }
