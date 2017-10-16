@@ -1,0 +1,259 @@
+version 15.1X49-D100.6;
+system {
+    host-name MYHOST;
+    time-zone GMT-8;
+    root-authentication {
+        encrypted-password "$5$VYJRXZ7F$p6vuhvDu289o/1rODJPwVGO3WQetiR2xJ8XZB/BIcM8"; ## SECRET-DATA
+    }
+    name-server {
+        10.45.67.1;
+    }
+    login {
+        user lab {
+            uid 2000;
+            class super-user;
+            authentication {
+                encrypted-password "$5$TlAsTkvB$vLIB3D8uxAndkfxnAxIiOsFWazzjhRSq0sq0YmrHK08"; ## SECRET-DATA
+            }
+        }
+        user user1 {
+            uid 2001;
+            class super-user;
+            authentication {
+                encrypted-password DLaUiAX3l78qgoB5c7iVNw; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ssh {
+            root-login allow;
+        }
+        web-management {
+            https {
+                system-generated-certificate;
+                interface fxp0.0;
+            }
+        }
+        dhcp {
+            pool 192.168.1.0/24 {
+                address-range low 192.168.1.2 high 192.168.1.254;
+                name-server {
+                    192.168.1.1;
+                }
+                router {
+                    192.168.1.1;
+                }
+            }
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any any;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+    license {
+        autoupdate {
+            url https://ae1.juniper.net/junos/key_retrieval;
+        }
+    }
+    ntp {
+        authentication-key 2 type md5 value "$9$c9Fyrv8LNbwgW8ZUHkPf"; ## SECRET-DATA
+        server 10.1.4.2;
+    }
+}
+security {
+    address-book {
+        global {
+            address-set infra-domain-controllers {
+                ##
+                ## Warning: referenced address must be defined under address-book
+                ## Warning: referenced address must be defined under address-book
+                ##
+                address 10.116.33.14;
+            }
+        }
+        internak {
+            address chicago 192.168.168.0/24;
+            attach {
+                zone untrust;
+            }
+        }
+    }
+    screen {
+        ids-option untrust-screen {
+            icmp {
+                ping-death;
+            }
+            ip {
+                source-route-option;
+                tear-drop;
+            }
+            tcp {
+                syn-flood {
+                    alarm-threshold 1024;
+                    attack-threshold 200;
+                    source-threshold 1024;
+                    destination-threshold 2048;
+                    queue-size 2000; ## Warning: 'queue-size' is deprecated
+                    timeout 20;
+                }
+                land;
+            }
+        }
+    }
+    nat {
+        source {
+            rule-set trust-to-untrust {
+                from zone trust;
+                to zone untrust;
+                rule source-nat-rule {
+                    match {
+                        source-address 0.0.0.0/0;
+                    }
+                    then {
+                        source-nat {
+                            interface;
+                        }
+                    }
+                }
+            }
+        }
+        static {
+            rule-set outside {
+                ##
+                ## Warning: Zone must be defined
+                ##
+                from zone outside;
+                rule 1 {
+                    match {
+                        destination-address 217.115.64.230/32;
+                    }
+                    then {
+                        static-nat {
+                            prefix {
+                                192.168.50.31/32;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    policies {
+        from-zone trust to-zone trust {
+            policy default-permit {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+        from-zone trust to-zone untrust {
+            policy default-permit {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+            policy trust-to-untrust {
+                match {
+                    source-address addr_192_168_0_0_24;
+                    destination-address any;
+                    source-address-excluded;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+    }
+    zones {
+        security-zone trust {
+            tcp-rst;
+            host-inbound-traffic {
+                system-services {
+                    all;
+                }
+                protocols {
+                    all;
+                }
+            }
+            interfaces {
+                vlan.0;
+            }
+        }
+        security-zone untrust {
+            ##
+            ## Warning: Zone specific address books are not allowed when there are global address books defined
+            ##
+            address-book {
+                address customaddress 192.168.0.1/24;
+                address-set addressset {
+                    address customaddress;
+                }
+                address-set nestedaddressset {
+                    ##
+                    ## Warning: referenced address must be defined under address-book
+                    ## Warning: referenced address must be defined under address-book
+                    ##
+                    address addressset;
+                }
+            }
+            screen untrust-screen;
+        }
+    }
+}
+interfaces {
+    ge-0/0/1 {
+        unit 0 {
+            family inet {
+                address 217.115.68.108/24;
+            }
+        }
+    }
+    fxp0 {
+        unit 0 {
+            family inet {
+                address 192.168.1.10/24;
+            }
+        }
+    }
+}
+routing-options {
+    static {
+        route 0.0.0.0/0 next-hop 10.0.0.5;
+    }
+}
+applications {
+    application custom1 {
+        term customterm protocol tcp destination-port 22;
+    }
+    application-set customgroup {
+        application custom1;
+    }
+    application-set nestedgroup {
+        application-set customgroup;
+    }
+}
+vlans {
+    vlan-trust {
+        vlan-id 3;
+        l3-interface irb.0;
+    }
+}

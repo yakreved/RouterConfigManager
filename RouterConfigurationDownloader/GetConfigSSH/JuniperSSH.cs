@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
 using System.Globalization;
+using System.Net;
+using System.Web.Hosting;
 
 namespace RouterConfigurationDownloader.GetConfigSSH
 {
@@ -47,38 +49,38 @@ namespace RouterConfigurationDownloader.GetConfigSSH
         private const string EOC = "*-* COMMAND DELIMITER *-*";
         public static string SetConfig(string config, string user, string password, string address, int port = 22)
         {
-            using (var client = new SshClient(address, port, user, password))
+            var cfgTempFilePath = HostingEnvironment.MapPath(@"~/cfg.txt");
+            File.WriteAllText(cfgTempFilePath,config);
+
+            try
             {
-                client.ConnectionInfo.Timeout = TimeSpan.FromSeconds(5);
-                client.Connect();
-                var stream = client.CreateShellStream("customCommand", 200, 24, 5000, 600, 4096);
-                stream.WriteLine("configure");
-                stream.Flush();
-                //stream.WriteLine(EOC);
-                string res = stream.Expect(user);
-                //Console.WriteLine(res);
 
-                stream.WriteLine("load override terminal");
-                stream.Flush();
-                //stream.WriteLine(EOC);
-
-                res += "\n\n"+ stream.Expect("Type");
-                //Console.WriteLine(res);
-                foreach (var str in ChunksUpto(config, 128))
+                using (var client = new SshClient(address, port, user, password))
                 {
-                    stream.Write(str);
+                    client.ConnectionInfo.Timeout = TimeSpan.FromSeconds(10);
+                    client.Connect();
+                    var stream = client.CreateShellStream("customCommand", 200, 24, 5000, 600, 4096);
+                    stream.WriteLine("configure");
                     stream.Flush();
-                    Thread.Sleep(10);
+                    //stream.WriteLine(EOC);
+                    string res = stream.Expect(user);
+                    //Console.WriteLine(res);
+
+                    stream.WriteLine("load override ftp://win2012-iis.bell-main.bellintegrator.ru/cfg.txt");
+                    stream.Flush();
+
+                    Thread.Sleep(2000);
+                    res = "\n===================================================\n" + stream.Expect("load complete");
+                    Console.WriteLine(res);
+                    var lines = Regex.Split(res, "\r\n|\r|\n");
+                    return string.Join(Environment.NewLine, lines.ToArray());
                 }
-                stream.WriteLine("");
-                stream.WriteLine("\x4");
-                stream.Flush();
-                Thread.Sleep(1000);
-                res = "\n===================================================\n" + stream.Read();
-                Console.WriteLine(res);
-                var lines = Regex.Split(res, "\r\n|\r|\n");
-                return string.Join(Environment.NewLine, lines.ToArray());
             }
+            catch (Exception e)
+            {
+                return "Router unreachable";
+            }
+
         }
 
     }
