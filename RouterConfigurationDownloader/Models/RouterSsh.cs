@@ -9,7 +9,7 @@ using System.Web.Script.Serialization;
 
 namespace RouterConfigurationDownloader.Models
 {
-    public class Config
+    public sealed class Config
     {
         public List<RouterSsh> Routers { get; set; } = new List<RouterSsh>();
         
