@@ -31,7 +31,7 @@ namespace RouterConfigurationDownloader.Controllers
         public ActionResult Edit(string name)
         {
             var config = Config.Load();
-            var tEdit = config.Routers.Where(r => r.Name == name).FirstOrDefault();
+            var tEdit = config.Routers.FirstOrDefault(r => r.Name == name);
             if (tEdit != null)
                 return View(tEdit);
             return RedirectToAction("Index");
@@ -44,7 +44,7 @@ namespace RouterConfigurationDownloader.Controllers
             {
                 var config = Config.Load();
                 config.Routers.Add(nRouter);
-                var tEdit = config.Routers.Where(r => r.Name == nRouter.Name).FirstOrDefault();
+                var tEdit = config.Routers.FirstOrDefault(r => r.Name == nRouter.Name);
                 config.Routers[config.Routers.IndexOf(tEdit)] = nRouter;
                 config.Save();
                 return RedirectToAction("Index");
@@ -70,7 +70,7 @@ namespace RouterConfigurationDownloader.Controllers
             try
             {
                 var config = Config.Load();
-                var tDownload = config.Routers.Where(r => r.Name == name).FirstOrDefault();
+                var tDownload = config.Routers.FirstOrDefault(r => r.Name == name);
                 if (tDownload != null)
                 {
                     string res = null;
@@ -94,7 +94,7 @@ namespace RouterConfigurationDownloader.Controllers
             {
                 string cfg = (new System.IO.StreamReader(file.InputStream)).ReadToEnd();
                 var config = Config.Load();
-                var router = config.Routers.Where(r => r.Name == name).FirstOrDefault();
+                var router = config.Routers.FirstOrDefault(r => r.Name == name);
                 if (router != null)
                 {
                     var res = SetConfig(cfg, router.UserName, router.UserPassword, router.Address, router.Port);
